@@ -1,0 +1,58 @@
+@using Azure.Data.Tables
+@model List<TableEntity>
+@{
+    ViewData["Title"] = "Orders";
+    ViewData["ActivePage"] = "Orders";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var games = ViewBag.Games as Dictionary<int, string> ?? new();
+}
+
+<div class="admin-topbar">
+  <div>
+    <div class="section-label">Orders</div>
+    <h1 class="section-title" style="font-size:1.6rem;">Processed Orders</h1>
+  </div>
+  <span style="font-size:0.82rem;color:var(--text-muted);align-self:center;">@Model.Count total</span>
+</div>
+
+@if (!Model.Any())
+{
+  <div class="card" style="padding:2rem;text-align:center;color:var(--text-muted);">
+    No orders have been processed yet.
+  </div>
+}
+else
+{
+  <div class="data-table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Game</th>
+          <th>Qty</th>
+          <th>Status</th>
+          <th>Processed At</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (var order in Model)
+        {
+          var orderId  = order.TryGetValue("OrderId",  out var oid) ? oid?.ToString() ?? "—" : "—";
+          var gameId   = order.TryGetValue("GameId",   out var gid) ? gid as int? ?? 0 : 0;
+          var qty      = order.TryGetValue("Quantity", out var q)   ? q?.ToString() ?? "1" : "1";
+          var status   = order.TryGetValue("Status",   out var s)   ? s?.ToString() ?? "—" : "—";
+          var title    = games.TryGetValue(gameId, out var t)       ? t : $"Game #{gameId}";
+          var badgeClass = status == "Fulfilled" ? "stock-in" : "stock-out";
+
+          <tr>
+            <td style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);">@orderId[..Math.Min(8, orderId.Length)]…</td>
+            <td style="font-weight:500;">@title</td>
+            <td>@qty</td>
+            <td><span class="game-stock @badgeClass">@status</span></td>
+            <td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">@order.Timestamp?.ToString("yyyy-MM-dd HH:mm")</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

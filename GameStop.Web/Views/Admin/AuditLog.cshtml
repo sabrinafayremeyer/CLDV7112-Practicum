@@ -1,0 +1,41 @@
+@using Azure.Data.Tables
+@model List<TableEntity>
+@{
+    ViewData["Title"] = "Audit Log";
+    ViewData["ActivePage"] = "AuditLog";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-topbar">
+  <div>
+    <div class="section-label">Inventory</div>
+    <h1 class="section-title" style="font-size:1.6rem;">Audit Log</h1>
+  </div>
+</div>
+
+@if (!Model.Any())
+{
+  <p style="color:var(--text-muted);padding:1rem 0;">No audit log entries yet.</p>
+}
+else
+{
+  <div class="data-table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr><th>Type</th><th>Action</th><th>Detail</th><th>By</th><th>Time</th></tr>
+      </thead>
+      <tbody>
+        @foreach (var log in Model)
+        {
+          <tr>
+            <td><span class="badge badge-accent">@log.PartitionKey</span></td>
+            <td>@(log.TryGetValue("Action", out var act) ? act?.ToString() : "—")</td>
+            <td>@(log.TryGetValue("Detail", out var det) ? det?.ToString() : log.TryGetValue("FileName", out var fn) ? fn?.ToString() : log.TryGetValue("GameId", out var gid) ? $"GameId: {gid}" : "—")</td>
+            <td style="color:var(--text-muted);">@(log.TryGetValue("PerformedBy", out var by) ? by?.ToString() : "system")</td>
+            <td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">@log.Timestamp?.ToString("yyyy-MM-dd HH:mm")</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

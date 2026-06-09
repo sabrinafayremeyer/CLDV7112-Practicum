@@ -1,0 +1,58 @@
+@model List<GameStop.Web.Models.Game>
+@{
+    ViewData["Title"] = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="hero">
+  <div class="hero-bg-lines"></div>
+  <div class="hero-accent-bar"></div>
+  <div class="page-wrapper hero-content">
+    <div class="hero-eyebrow">GameStop Inventory</div>
+    <h1 class="hero-title">
+      Your next game
+      <span class="highlight">starts here.</span>
+    </h1>
+    <p class="hero-subtitle">
+      Browse our curated catalogue of games across all platforms. Real-time stock, instant checkout — powered by Azure.
+    </p>
+    <div class="hero-cta">
+      <a asp-controller="Games" asp-action="Index" class="btn btn-primary">Browse Catalog</a>
+      @if (Context.Session.GetString("Username") == null)
+      {
+        <a asp-controller="Account" asp-action="Register" class="btn btn-secondary">Create Account</a>
+      }
+    </div>
+  </div>
+</section>
+
+<div class="page-wrapper page-section">
+  <div class="section-label">Featured</div>
+  <h2 class="section-title">Top Picks</h2>
+  <p class="section-desc">Our highest-stocked titles, ready to ship.</p>
+
+  <div class="game-cards-grid">
+    @foreach (var game in Model)
+    {
+      <a class="game-card" asp-controller="Games" asp-action="Details" asp-route-id="@game.Id">
+        <img class="game-card-img" src="@game.ImageUrl" alt="@game.Title" onerror="this.src='/images/placeholder.png'" />
+        <div class="game-card-body">
+          <div class="game-card-title">@game.Title</div>
+          <div class="game-card-meta">@game.Platform · @game.Genre</div>
+          <div class="game-card-footer">
+            <span class="game-price">@(game.Price == 0 ? "Free" : $"R{game.Price:0}")</span>
+            @{
+              var stockClass = game.StockCount == 0 ? "stock-out" : game.StockCount <= 10 ? "stock-low" : "stock-in";
+              var stockLabel = game.StockCount == 0 ? "Out of Stock" : game.StockCount <= 10 ? "Low Stock" : "In Stock";
+            }
+            <span class="game-stock @stockClass">@stockLabel</span>
+          </div>
+        </div>
+      </a>
+    }
+  </div>
+
+  <div style="margin-top:2rem;">
+    <a asp-controller="Games" asp-action="Index" class="btn btn-ghost">View Full Catalog →</a>
+  </div>
+</div>

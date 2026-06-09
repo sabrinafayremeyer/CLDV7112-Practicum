@@ -1,0 +1,71 @@
+@model List<GameStop.Web.Models.Game>
+@{
+    ViewData["Title"] = "Game Catalog";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var platforms = ViewBag.Platforms as List<string> ?? new List<string>();
+}
+
+<div class="page-wrapper page-section">
+  <div class="section-label">Catalog</div>
+  <h1 class="section-title">All Games</h1>
+
+  <form method="get" class="filter-bar" id="filterForm">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="form-input" type="text" name="search" id="searchInput" placeholder="Search by title or genre…" value="@ViewBag.Search" autocomplete="off" />
+    </div>
+    <select class="form-select" name="platform" id="platformSelect" style="width:auto;min-width:180px;">
+      <option value="">All Platforms</option>
+      @foreach (var p in platforms)
+      {
+        @if (ViewBag.Platform == p) { <option value="@p" selected>@p</option> }
+        else { <option value="@p">@p</option> }
+      }
+    </select>
+    @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()) || !string.IsNullOrEmpty(ViewBag.Platform?.ToString()))
+    {
+      <a asp-controller="Games" asp-action="Index" class="btn btn-ghost btn-sm">Clear</a>
+    }
+  </form>
+
+  @section Scripts {
+<script>
+  let searchTimer;
+  document.getElementById('searchInput').addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => document.getElementById('filterForm').submit(), 350);
+  });
+  document.getElementById('platformSelect').addEventListener('change', () => {
+    document.getElementById('filterForm').submit();
+  });
+</script>
+}
+
+@if (!Model.Any())
+  {
+    <p style="color:var(--text-muted);">No games found. Try a different search.</p>
+  }
+  else
+  {
+    <div class="game-cards-grid">
+      @foreach (var game in Model)
+      {
+        <a class="game-card" asp-controller="Games" asp-action="Details" asp-route-id="@game.Id">
+          <img class="game-card-img" src="@game.ImageUrl" alt="@game.Title" onerror="this.src='/images/placeholder.png'" />
+          <div class="game-card-body">
+            <div class="game-card-title">@game.Title</div>
+            <div class="game-card-meta">@game.Platform · @game.Genre</div>
+            <div class="game-card-footer">
+              <span class="game-price">@(game.Price == 0 ? "Free" : $"R{game.Price:0}")</span>
+              @{
+                var sc = game.StockCount == 0 ? "stock-out" : game.StockCount <= 10 ? "stock-low" : "stock-in";
+                var sl = game.StockCount == 0 ? "Out of Stock" : game.StockCount <= 10 ? "Low Stock" : "In Stock";
+              }
+              <span class="game-stock @sc">@sl</span>
+            </div>
+          </div>
+        </a>
+      }
+    </div>
+  }
+</div>

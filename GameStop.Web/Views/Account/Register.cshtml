@@ -1,0 +1,45 @@
+@model GameStop.Web.Models.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div style="position:relative;height:80px;margin-bottom:1rem;">
+      <img src="@Url.Content("~/images/2.svg")" alt="GameStop" style="height:220px;position:absolute;left:50%;transform:translateX(-50%);top:-80px;" />
+    </div>
+    <h1 class="auth-title">Create account</h1>
+    <p class="auth-sub">Join GameStop and start shopping.</p>
+
+    <div asp-validation-summary="ModelOnly" class="alert-error"></div>
+
+    <form asp-action="Register" method="post">
+      <div class="form-group">
+        <label class="form-label" asp-for="Username">Username</label>
+        <input class="form-input" asp-for="Username" placeholder="choose_a_username" />
+        <span asp-validation-for="Username" class="field-validation-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" asp-for="Email">Email</label>
+        <input class="form-input" asp-for="Email" type="email" placeholder="you@example.com" />
+        <span asp-validation-for="Email" class="field-validation-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" asp-for="Password">Password</label>
+        <input class="form-input" asp-for="Password" type="password" placeholder="••••••••" />
+        <span asp-validation-for="Password" class="field-validation-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" asp-for="ConfirmPassword">Confirm Password</label>
+        <input class="form-input" asp-for="ConfirmPassword" type="password" placeholder="••••••••" />
+        <span asp-validation-for="ConfirmPassword" class="field-validation-error"></span>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:0.5rem;">Create Account</button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a asp-controller="Account" asp-action="Login">Sign in</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,35 @@
+@model GameStop.Web.Models.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div style="position:relative;height:80px;margin-bottom:1rem;">
+      <img src="@Url.Content("~/images/2.svg")" alt="GameStop" style="height:220px;position:absolute;left:50%;transform:translateX(-50%);top:-80px;" />
+    </div>
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-sub">Sign in to your GameStop account.</p>
+
+    <div asp-validation-summary="ModelOnly" class="alert-error"></div>
+
+    <form asp-action="Login" method="post">
+      <div class="form-group">
+        <label class="form-label" asp-for="Username">Username</label>
+        <input class="form-input" asp-for="Username" placeholder="your_username" autocomplete="username" />
+        <span asp-validation-for="Username" class="field-validation-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" asp-for="Password">Password</label>
+        <input class="form-input" asp-for="Password" type="password" placeholder="••••••••" autocomplete="current-password" />
+        <span asp-validation-for="Password" class="field-validation-error"></span>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:0.5rem;">Sign In</button>
+    </form>
+
+    <div class="auth-footer">
+      Don't have an account? <a asp-controller="Account" asp-action="Register">Register</a>
+    </div>
+  </div>
+</div>

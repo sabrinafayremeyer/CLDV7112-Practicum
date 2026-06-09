@@ -1,0 +1,83 @@
+@model GameStop.Web.Models.ViewModels.GameFormViewModel
+@{
+    ViewData["Title"] = "Add Game";
+    ViewData["ActivePage"] = "CreateGame";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-topbar">
+  <div>
+    <div class="section-label">Inventory</div>
+    <h1 class="section-title" style="font-size:1.6rem;">Add New Game</h1>
+  </div>
+  <a asp-action="Dashboard" class="btn btn-ghost btn-sm">← Dashboard</a>
+</div>
+
+<div class="card" style="max-width:680px;">
+  <form asp-action="CreateGame" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="alert-error"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="form-group" style="grid-column:1/-1;">
+        <label class="form-label" asp-for="Title">Title</label>
+        <input class="form-input" asp-for="Title" placeholder="Game title" />
+        <span asp-validation-for="Title" class="field-validation-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" asp-for="Platform">Platform</label>
+        <select class="form-select" asp-for="Platform">
+          <option value="">— Select platform —</option>
+          <option>PC</option>
+          <option>PC / PS5</option>
+          <option>PC / Xbox 360</option>
+          <option>PC / Switch</option>
+          <option>PS5</option>
+          <option>Xbox Series X</option>
+          <option>Multi-platform</option>
+          <option>Nintendo Switch</option>
+        </select>
+        <span asp-validation-for="Platform" class="field-validation-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" asp-for="Genre">Genre</label>
+        <select class="form-select" asp-for="Genre">
+          <option value="">— Select genre —</option>
+          <option>Action / Adventure</option>
+          <option>Action / RPG</option>
+          <option>RPG</option>
+          <option>Simulation</option>
+          <option>Hero Shooter</option>
+          <option>Tactical Shooter</option>
+          <option>Horror / Co-op</option>
+          <option>Sports</option>
+          <option>Strategy</option>
+          <option>Fighting</option>
+          <option>Platformer</option>
+          <option>Puzzle</option>
+        </select>
+        <span asp-validation-for="Genre" class="field-validation-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" asp-for="Price">Price (R)</label>
+        <input class="form-input" asp-for="Price" type="number" step="1" min="0" placeholder="0" />
+        <span asp-validation-for="Price" class="field-validation-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" asp-for="StockCount">Stock Count</label>
+        <input class="form-input" asp-for="StockCount" type="number" min="0" placeholder="0" />
+        <span asp-validation-for="StockCount" class="field-validation-error"></span>
+      </div>
+      <div class="form-group" style="grid-column:1/-1;">
+        <label class="form-label" asp-for="Description">Description</label>
+        <textarea class="form-textarea" asp-for="Description" placeholder="Short game description…"></textarea>
+      </div>
+      <div class="form-group" style="grid-column:1/-1;">
+        <label class="form-label" asp-for="ImageFile">Cover Image</label>
+        <input class="form-input" asp-for="ImageFile" type="file" accept="image/*" style="padding:6px 14px;" />
+        <span asp-validation-for="ImageFile" class="field-validation-error"></span>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Upload & Save Game</button>
+  </form>
+</div>

@@ -1,0 +1,61 @@
+@model List<GameStop.Web.Models.Game>
+@{
+    ViewData["Title"] = "Inventory";
+    ViewData["ActivePage"] = "Inventory";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-topbar">
+  <div>
+    <div class="section-label">Inventory</div>
+    <h1 class="section-title" style="font-size:1.6rem;">All Games</h1>
+  </div>
+  <a asp-action="CreateGame" class="btn btn-primary btn-sm">+ Add Game</a>
+</div>
+
+<div class="data-table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Game</th>
+        <th>Platform</th>
+        <th>Genre</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach (var game in Model)
+      {
+        <tr>
+          <td>
+            <div class="td-game">
+              <img class="td-thumb" src="@game.ImageUrl" alt="@game.Title" onerror="this.src='/images/placeholder.png'" />
+              <div class="td-game-name">@game.Title</div>
+            </div>
+          </td>
+          <td><span class="td-game-platform">@game.Platform</span></td>
+          <td>@game.Genre</td>
+          <td>@(game.Price == 0 ? "Free" : $"R{game.Price:0}")</td>
+          <td>
+            @{
+              var sc = game.StockCount == 0 ? "stock-out" : game.StockCount <= 10 ? "stock-low" : "stock-in";
+              var sl = game.StockCount == 0 ? "Out" : game.StockCount <= 10 ? $"Low ({game.StockCount})" : game.StockCount.ToString();
+            }
+            <span class="game-stock @sc">@sl</span>
+          </td>
+          <td>
+            <div class="td-actions">
+              <a asp-action="EditGame" asp-route-id="@game.Id" class="btn btn-ghost btn-sm">Edit</a>
+              <form asp-action="DeleteGame" method="post" style="display:inline;" onsubmit="return confirm('Delete @game.Title?')">
+                <input type="hidden" name="id" value="@game.Id" />
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

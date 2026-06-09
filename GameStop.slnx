@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="GameStop.Web/GameStop.Web.csproj" />
+  <Project Path="GameStop.Functions/GameStop.Functions.csproj" />
+</Solution>

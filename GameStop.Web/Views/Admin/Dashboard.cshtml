@@ -1,0 +1,172 @@
+@using Azure.Data.Tables
+@using GameStop.Web.Models
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["ActivePage"] = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var lowStockGames  = ViewBag.LowStockGames  as List<Game>               ?? new();
+    var topStockGames  = ViewBag.TopStockGames  as List<Game>               ?? new();
+    var recentLogs     = ViewBag.RecentLogs     as List<TableEntity>         ?? new();
+    int inStock    = ViewBag.InStock;
+    int lowStock   = ViewBag.LowStock;
+    int outOfStock = ViewBag.OutOfStock;
+}
+
+<div class="admin-topbar">
+  <div>
+    <div class="section-label">Admin</div>
+    <h1 class="section-title" style="font-size:1.6rem;">Dashboard</h1>
+  </div>
+  <a asp-action="CreateGame" class="btn btn-primary btn-sm">+ Add Game</a>
+</div>
+
+<div class="metrics-grid" style="margin-bottom:2rem;">
+  <div class="metric-card accent-blue">
+    <div class="metric-label">Total Titles</div>
+    <div class="metric-value">@ViewBag.TotalGames</div>
+    <div class="metric-delta">games in catalogue</div>
+  </div>
+  <div class="metric-card accent-green">
+    <div class="metric-label">Total Stock</div>
+    <div class="metric-value">@ViewBag.TotalStock</div>
+    <div class="metric-delta">units available</div>
+  </div>
+  <div class="metric-card accent-amber">
+    <div class="metric-label">Low Stock</div>
+    <div class="metric-value">@ViewBag.LowStock</div>
+    <div class="metric-delta">titles ≤ 10 units</div>
+  </div>
+  <div class="metric-card accent-red">
+    <div class="metric-label">Out of Stock</div>
+    <div class="metric-value">@ViewBag.OutOfStock</div>
+    <div class="metric-delta">titles unavailable</div>
+  </div>
+  <div class="metric-card accent-blue">
+    <div class="metric-label">Avg. Price</div>
+    <div class="metric-value" style="font-size:1.6rem;">R@(((decimal)ViewBag.AvgPrice).ToString("0"))</div>
+    <div class="metric-delta">across all titles</div>
+  </div>
+  <div class="metric-card accent-green">
+    <div class="metric-label">Inventory Value</div>
+    <div class="metric-value" style="font-size:1.4rem;">R@(((decimal)ViewBag.InventoryValue).ToString("N0"))</div>
+    <div class="metric-delta">price × stock</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+
+    <div class="card" style="padding:1.5rem;">
+    <div class="section-label" style="margin-bottom:0.5rem;">Stock Health</div>
+    <h3 style="font-size:1rem;font-weight:600;margin-bottom:1.25rem;">Inventory Distribution</h3>
+    <div style="display:flex;justify-content:center;">
+      <canvas id="stockChart" width="140" height="140"></canvas>
+    </div>
+    <div style="display:flex;gap:1rem;justify-content:center;margin-top:1rem;font-size:0.8rem;">
+      <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#00b87a;display:inline-block;"></span>In Stock (@inStock)</span>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#f59e0b;display:inline-block;"></span>Low Stock (@lowStock)</span>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#e8196e;display:inline-block;"></span>Out (@outOfStock)</span>
+    </div>
+  </div>
+
+    <div class="card" style="padding:1.5rem;">
+    <div class="section-label" style="margin-bottom:0.5rem;">Alerts</div>
+    <h3 style="font-size:1rem;font-weight:600;margin-bottom:1.25rem;">Low Stock Games</h3>
+    @if (!lowStockGames.Any())
+    {
+      <p style="color:var(--text-muted);font-size:0.85rem;">No low stock alerts.</p>
+    }
+    else
+    {
+      <div style="display:flex;flex-direction:column;gap:0.6rem;">
+        @foreach (var g in lowStockGames)
+        {
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border-subtle);">
+            <div>
+              <div style="font-weight:600;font-size:0.85rem;">@g.Title</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);">@g.Platform</div>
+            </div>
+            <span class="game-stock stock-low">@g.StockCount left</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+
+    <div class="card" style="padding:1.5rem;">
+    <div class="section-label" style="margin-bottom:0.5rem;">Inventory</div>
+    <h3 style="font-size:1rem;font-weight:600;margin-bottom:1.25rem;">Top 5 by Stock</h3>
+    <div style="display:flex;flex-direction:column;gap:0.6rem;">
+      @foreach (var g in topStockGames)
+      {
+        var pct = ViewBag.TotalStock > 0 ? (int)((double)g.StockCount / (double)ViewBag.TotalStock * 100) : 0;
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:3px;">
+            <span style="font-weight:500;">@g.Title</span>
+            <span style="color:var(--text-muted);">@g.StockCount units</span>
+          </div>
+          <div style="background:var(--bg-elevated);border-radius:99px;height:6px;">
+            <div style="background:var(--accent);border-radius:99px;height:6px;width:@(pct)%;"></div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+    <div class="card" style="padding:1.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+      <div>
+        <div class="section-label" style="margin-bottom:0.25rem;">Activity</div>
+        <h3 style="font-size:1rem;font-weight:600;">Recent Audit Events</h3>
+      </div>
+      <a asp-action="AuditLog" class="btn btn-ghost btn-sm">View all</a>
+    </div>
+    @if (!recentLogs.Any())
+    {
+      <p style="color:var(--text-muted);font-size:0.85rem;">No activity yet.</p>
+    }
+    else
+    {
+      <div style="display:flex;flex-direction:column;gap:0.6rem;">
+        @foreach (var log in recentLogs)
+        {
+          var action = log.TryGetValue("Action", out var a) ? a?.ToString() : log.PartitionKey;
+          var detail = log.TryGetValue("Detail", out var d) ? d?.ToString() : log.TryGetValue("FileName", out var f) ? f?.ToString() : "—";
+          var by     = log.TryGetValue("PerformedBy", out var b) ? b?.ToString() : "system";
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border-subtle);">
+            <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+              <span class="badge badge-accent" style="font-size:0.7rem;">@action</span>
+              <span style="font-size:0.72rem;color:var(--text-muted);font-family:var(--font-mono);">@log.Timestamp?.ToString("dd MMM HH:mm")</span>
+            </div>
+            <div style="font-size:0.82rem;color:var(--text-secondary);">@detail</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">by @by</div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  new Chart(document.getElementById('stockChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['In Stock', 'Low Stock', 'Out of Stock'],
+      datasets: [{
+        data: [@inStock, @lowStock, @outOfStock],
+        backgroundColor: ['#00b87a', '#f59e0b', '#e8196e'],
+        borderWidth: 0,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      cutout: '70%',
+      plugins: { legend: { display: false } }
+    }
+  });
+</script>
+}

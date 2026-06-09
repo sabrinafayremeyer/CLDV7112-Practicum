@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"] — GameStop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="nav-logo" asp-controller="Home" asp-action="Index">
+    <img src="~/images/2.svg" alt="GameStop" />
+  </a>
+  <ul class="nav-links">
+    <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+    <li><a asp-controller="Games" asp-action="Index">Catalog</a></li>
+    @if (Context.Session.GetString("Role") == "Admin")
+    {
+      <li><a asp-controller="Admin" asp-action="Dashboard">Admin</a></li>
+    }
+    @if (Context.Session.GetString("Username") != null)
+    {
+      <li><a asp-controller="Account" asp-action="Logout">Logout (@Context.Session.GetString("Username"))</a></li>
+    }
+    else
+    {
+      <li><a asp-controller="Account" asp-action="Login">Login</a></li>
+      <li><a asp-controller="Account" asp-action="Register">Register</a></li>
+    }
+  </ul>
+</nav>
+
+@RenderBody()
+
+<div id="toast"></div>
+
+<footer class="site-footer">
+  <span>© 2026 GameStop Inventory System</span>
+  <span style="font-family:var(--font-mono);font-size:0.7rem;">CLDV7112 Practicum</span>
+</footer>
+
+<script>
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type ? `show ${type}` : 'show';
+  setTimeout(() => t.className = '', 3000);
+}
+</script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

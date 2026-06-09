@@ -1,0 +1,94 @@
+@model GameStop.Web.Models.Game
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-wrapper">
+  <div class="game-detail">
+    <div>
+      <img class="game-detail-img" src="@Model.ImageUrl" alt="@Model.Title" onerror="this.src='/images/placeholder.png'" />
+    </div>
+    <div class="game-detail-info">
+      <div>
+        <span class="badge-blue badge" style="margin-bottom:0.75rem;display:inline-block;">@Model.Platform</span>
+        <span class="badge badge-accent" style="margin-bottom:0.75rem;display:inline-block;">@Model.Genre</span>
+      </div>
+      <h1 class="game-detail-title">@Model.Title</h1>
+      <div class="game-detail-price">@(Model.Price == 0 ? "Free to Play" : $"R{Model.Price:0}")</div>
+      <p class="game-detail-desc">@Model.Description</p>
+
+      <div class="game-meta-row">
+        <div class="stock-live">
+          <span class="stock-spinner" id="stock-spinner"></span>
+          <span id="stock-badge" class="game-stock">Loading stock…</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+        @if (Context.Session.GetString("Username") != null)
+        {
+          <button class="btn btn-primary" id="buy-btn" onclick="addToCart(@Model.Id)">Add to Cart</button>
+        }
+        else
+        {
+          <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Login to Purchase</a>
+        }
+        <a asp-controller="Games" asp-action="Index" class="btn btn-ghost">← Back to Catalog</a>
+      </div>
+
+      <div style="font-size:0.78rem;color:var(--text-muted);">
+        Added: @Model.CreatedAt.ToString("MMM yyyy")
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+async function loadStock() {
+  try {
+    const res = await fetch('/Games/Stock?gameId=@Model.Id');
+    const data = await res.json();
+    const badge = document.getElementById('stock-badge');
+    const spinner = document.getElementById('stock-spinner');
+    spinner.style.display = 'none';
+    if (data.status === 'InStock') {
+      badge.textContent = `In Stock (${data.stockCount})`;
+      badge.className = 'game-stock stock-in';
+    } else if (data.status === 'LowStock') {
+      badge.textContent = `Low Stock (${data.stockCount} left)`;
+      badge.className = 'game-stock stock-low';
+    } else {
+      badge.textContent = 'Out of Stock';
+      badge.className = 'game-stock stock-out';
+    }
+  } catch {
+    document.getElementById('stock-spinner').style.display = 'none';
+    document.getElementById('stock-badge').textContent = 'Stock unavailable';
+  }
+}
+loadStock();
+
+async function addToCart(gameId) {
+  const btn = document.getElementById('buy-btn');
+  btn.disabled = true;
+  btn.textContent = 'Processing…';
+  try {
+    const res = await fetch('/Orders/Buy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '' },
+      body: JSON.stringify({ gameId })
+    });
+    const data = await res.json();
+    showToast(data.message, data.success ? 'success' : 'error');
+    if (data.success) loadStock();
+  } catch {
+    showToast('Network error. Please try again.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Add to Cart';
+  }
+}
+</script>
+}
